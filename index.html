@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>PixifyPDF — Image to PDF & Image Compressor</title>
+  <meta name="description" content="PixifyPDF — Convert images to A4 PDF or compress images quickly. Fast, private, and fully client-side."/>
+  <!-- Google Inter font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#0b1020;
+      --card:#0f1724;
+      --muted:#94a3b8;
+      --accent1:#0ea5ff; /* blue */
+      --accent2:#6d28d9; /* purple-blue */
+      --glass: rgba(255,255,255,0.03);
+      --radius:12px;
+    }
+    *{box-sizing:border-box}
+    body{margin:0; font-family:Inter, system-ui, Arial; background:linear-gradient(180deg,#060712 0%, #061226 100%); color:#e6eef8; -webkit-font-smoothing:antialiased}
+    .wrap{max-width:980px;margin:36px auto;padding:20px;}
+    header{display:flex;align-items:center;gap:16px;margin-bottom:18px}
+    .logo{
+      display:flex;align-items:center;gap:12px;
+    }
+    .logo svg{width:44px;height:44px}
+    .brand{font-weight:700;font-size:20px;letter-spacing:0.2px}
+    .tag{color:var(--muted);font-size:13px}
+    nav{margin-left:auto;display:flex;gap:12px;align-items:center}
+    .btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:8px 12px;border-radius:10px;color:var(--muted);font-weight:600;cursor:pointer}
+    .hero{background:linear-gradient(90deg, rgba(14,165,255,0.06), rgba(109,40,217,0.04));border-radius:var(--radius);padding:22px;display:grid;grid-template-columns:1fr 320px;gap:18px;align-items:center;border:1px solid rgba(255,255,255,0.03)}
+    .hero h1{margin:0;font-size:22px}
+    .hero p{margin:6px 0 0;color:var(--muted)}
+    .panel{background:var(--card);border-radius:12px;padding:16px;border:1px solid rgba(255,255,255,0.025)}
+    .upload-area{border:2px dashed rgba(255,255,255,0.03);padding:18px;border-radius:10px;text-align:center;cursor:pointer}
+    .upload-area input{display:none}
+    .big-btn{display:inline-block;background:linear-gradient(90deg,var(--accent1),var(--accent2));padding:10px 16px;border-radius:10px;color:#001026;font-weight:700;border:none;cursor:pointer;margin-top:10px}
+    .controls{display:flex;flex-direction:column;gap:10px}
+    .thumbs{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+    .thumb{width:120px;background:var(--glass);padding:8px;border-radius:8px;display:flex;flex-direction:column;gap:8px;align-items:center}
+    .thumb img{max-width:100%;height:78px;object-fit:cover;border-radius:6px}
+    .thumb .name{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%}
+    .thumb .mini-controls{display:flex;gap:6px}
+    .mini-btn{background:transparent;border:1px solid rgba(255,255,255,0.04);padding:6px;border-radius:8px;font-size:12px;color:var(--muted);cursor:pointer}
+    footer{margin-top:18px;color:var(--muted);font-size:13px;display:flex;justify-content:space-between;align-items:center}
+    .tools-side{padding:12px}
+    .section-title{font-weight:600;margin-bottom:8px}
+    label.range{display:flex;gap:10px;align-items:center}
+    input[type="range"]{width:100%}
+    .small{font-size:13px;color:var(--muted)}
+    .status{margin-top:10px;color:var(--accent1);font-weight:600}
+    .flex-row{display:flex;gap:10px;align-items:center}
+    .download-btn{background:linear-gradient(90deg,var(--accent1),var(--accent2));padding:10px 12px;border-radius:10px;border:none;color:#001026;font-weight:700;cursor:pointer}
+    /* responsive */
+    @media (max-width:880px){
+      .hero{grid-template-columns:1fr;gap:12px}
+      .thumb{width:100px}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="logo">
+        <!-- Simple SVG logo (blue paper + spark) - PixifyPDF -->
+        <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="PixifyPDF logo">
+          <defs>
+            <linearGradient id="g1" x1="0" x2="1" y1="0" y2="1">
+              <stop offset="0" stop-color="#0ea5ff"/>
+              <stop offset="1" stop-color="#6d28d9"/>
+            </linearGradient>
+          </defs>
+          <rect x="6" y="8" width="42" height="48" rx="4" fill="#071428"/>
+          <path d="M46 18H34a2 2 0 0 1-2-2V6" stroke="url(#g1)" stroke-width="3" stroke-linecap="round" fill="none"/>
+          <path d="M20 26h24M20 34h24M20 42h14" stroke="#78a3ff" stroke-width="2.2" stroke-linecap="round"/>
+          <circle cx="50" cy="50" r="10" fill="url(#g1)" />
+          <path d="M47.5 45.5l1.8 3 3.2-1.2" stroke="#001026" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        </svg>
+        <div>
+          <div class="brand">PixifyPDF</div>
+          <div class="tag">Image → PDF • Compressor • Private & fast</div>
+        </div>
+      </div>
+      <nav>
+        <button class="btn-ghost" id="toggleTheme">Light</button>
+        <button class="btn-ghost" id="aboutBtn">About</button>
+      </nav>
+    </header>
+
+    <section class="hero">
+      <div class="panel">
+        <h1>Convert images to A4 PDF instantly</h1>
+        <p class="small">Upload images (JPG, PNG). They convert on your device — no uploads to servers. Reorder, compress, then create a single A4 PDF.</p>
+
+        <div style="margin-top:14px" class="upload-area panel" id="dropzone" tabindex="0">
+          <input id="fileInput" type="file" accept="image/*" multiple>
+          <div style="font-weight:600">Drag & drop images here or click to select</div>
+          <div class="small" style="margin-top:8px">Supports JPG and PNG. Up to 20 files recommended.</div>
+        </div>
+
+        <div class="thumbs" id="thumbs"></div>
+
+        <div class="controls" style="margin-top:12px">
+          <div class="flex-row">
+            <button class="download-btn" id="toPdfBtn" disabled>Convert to PDF</button>
+            <button class="btn-ghost" id="clearBtn">Clear</button>
+            <div style="margin-left:auto" class="small">PDF page size: A4 • Orientation: Auto</div>
+          </div>
+          <div id="status" class="status" aria-live="polite"></div>
+        </div>
+      </div>
+
+      <aside class="tools-side panel">
+        <div>
+          <div class="section-title">Image Compressor</div>
+          <p class="small">Reduce file size before creating PDF or download compressed images.</p>
+          <div style="margin-top:10px">
+            <label class="range small">Quality <span id="qVal">0.8</span>
+              <input type="range" id="qualityRange" min="0.2" max="1" step="0.05" value="0.80">
+            </label>
+            <label class="range small">Max width (px)
+              <input type="range" id="maxW" min="400" max="4000" step="50" value="2480">
+            </label>
+            <div style="display:flex;gap:10px;margin-top:8px">
+              <button class="big-btn" id="compressBtn" disabled>Compress & ZIP</button>
+              <button class="btn-ghost" id="previewCompressed" disabled>Preview last</button>
+            </div>
+            <div class="small" style="margin-top:10px">Auto-rename enabled: <strong>pixify_01.jpg</strong>, pixify_02.jpg...</div>
+          </div>
+
+          <hr style="margin:12px 0;border-color:rgba(255,255,255,0.03)">
+
+          <div class="section-title">Tips</div>
+          <ul style="margin:0;padding-left:18px;color:var(--muted);font-size:13px">
+            <li>For smallest PDF size, compress images to ~0.6 quality.</li>
+            <li>Use <em>Compress & ZIP</em> to download compressed images for backups.</li>
+          </ul>
+        </div>
+      </aside>
+    </section>
+
+    <footer>
+      <div class="small">Made with ♥ — PixifyPDF • Client-side processing for privacy</div>
+      <div class="small">Need features? Message me</div>
+    </footer>
+  </div>
+
+  <!-- Libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.0/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+  <script>
+    // PixifyPDF v1 - client-side image -> PDF + compressor + ZIP
+    (function(){
+      const fileInput = document.getElementById('fileInput');
+      const dropzone = document.getElementById('dropzone');
+      const thumbs = document.getElementById('thumbs');
+      const toPdfBtn = document.getElementById('toPdfBtn');
+      const clearBtn = document.getElementById('clearBtn');
+      const status = document.getElementById('status');
+      const compressBtn = document.getElementById('compressBtn');
+      const qualityRange = document.getElementById('qualityRange');
+      const qVal = document.getElementById('qVal');
+      const maxW = document.getElementById('maxW');
+      const previewCompressed = document.getElementById('previewCompressed');
+
+      let images = []; // {file, url, name, compressedDataURL (optional)}
+
+      function updateButtons(){
+        const ok = images.length>0;
+        toPdfBtn.disabled = !ok;
+        clearBtn.disabled = !ok;
+        compressBtn.disabled = !ok;
+        previewCompressed.disabled = !ok;
+      }
+
+      function humanName(i){
+        return `pixify_${String(i+1).padStart(2,'0')}.jpg`;
+      }
+
+      function addFiles(fileList){
+        const files = Array.from(fileList).slice(0,20); // limit
+        for(const f of files){
+          if(!f.type.startsWith('image/')) continue;
+          const url = URL.createObjectURL(f);
+          images.push({file:f, url, name:f.name});
+        }
+        renderThumbs();
+        updateButtons();
+      }
+
+      function renderThumbs(){
+        thumbs.innerHTML = '';
+        images.forEach((it, idx) => {
+          const d = document.createElement('div'); d.className='thumb';
+          const img = document.createElement('img'); img.src = it.url;
+          const nm = document.createElement('div'); nm.className='name'; nm.textContent = it.name;
+          const ctr = document.createElement('div'); ctr.className='mini-controls';
+          const up = document.createElement('button'); up.className='mini-btn'; up.textContent='▲';
+          const down = document.createElement('button'); down.className='mini-btn'; down.textContent='▼';
+          const del = document.createElement('button'); del.className='mini-btn'; del.textContent='✖';
+          up.onclick = ()=>{ if(idx>0){ images.splice(idx-1,0,images.splice(idx,1)[0]); renderThumbs(); } };
+          down.onclick = ()=>{ if(idx<images.length-1){ images.splice(idx+1,0,images.splice(idx,1)[0]); renderThumbs(); } };
+          del.onclick = ()=>{ images.splice(idx,1); URL.revokeObjectURL(it.url); renderThumbs(); updateButtons(); };
+          ctr.appendChild(up); ctr.appendChild(down); ctr.appendChild(del);
+          d.appendChild(img); d.appendChild(nm); d.appendChild(ctr);
+          thumbs.appendChild(d);
+        });
+      }
+
+      // drag & drop handlers
+      dropzone.addEventListener('click', ()=>fileInput.click());
+      dropzone.addEventListener('dragover', (e)=>{ e.preventDefault(); dropzone.style.borderColor='rgba(14,165,255,0.6)'; });
+      dropzone.addEventListener('dragleave', ()=>{ dropzone.style.borderColor='rgba(255,255,255,0.03)'; });
+      dropzone.addEventListener('drop', (e)=>{ e.preventDefault(); dropzone.style.borderColor='rgba(255,255,255,0.03)'; addFiles(e.dataTransfer.files); });
+      fileInput.addEventListener('change', (e)=> addFiles(e.target.files));
+
+      clearBtn.addEventListener('click', ()=>{
+        images.forEach(i=>URL.revokeObjectURL(i.url));
+        images = [];
+        renderThumbs(); updateButtons();
+      });
+
+      // Convert to PDF
+      toPdfBtn.addEventListener('click', async ()=>{
+        if(images.length===0) return;
+        toPdfBtn.disabled = true;
+        status.textContent = 'Converting to PDF...';
+        try{
+          const { jsPDF } = window.jspdf;
+          const pdf = new jsPDF({ unit:'pt', format:'a4' }); // default orientation auto
+          const pageWidth = pdf.internal.pageSize.getWidth();
+          const pageHeight = pdf.internal.pageSize.getHeight();
+
+          for(let i=0;i<images.length;i++){
+            const item = images[i];
+            // compress/resize image for PDF by drawing on canvas (use quality 0.9)
+            const dataURL = await fileToDataURL(item.file);
+            const imgEl = await loadImage(dataURL);
+            // scale to fit page
+            let iw = imgEl.width, ih = imgEl.height;
+            const ratio = Math.min(pageWidth / iw, pageHeight / ih);
+            let w = iw * ratio, h = ih * ratio;
+            const x = (pageWidth - w)/2, y = (pageHeight - h)/2;
+            if(i>0) pdf.addPage();
+            pdf.addImage(dataURL, 'JPEG', x, y, w, h, undefined, 'FAST');
+          }
+          pdf.save('pixify_images.pdf');
+          status.textContent = 'PDF ready — downloaded.';
+        }catch(err){
+          console.error(err);
+          status.textContent = 'Error while creating PDF.';
+        } finally {
+          setTimeout(()=>{ status.textContent=''; },2200);
+          toPdfBtn.disabled = false;
+        }
+      });
+
+      // Utility: file -> dataURL
+      function fileToDataURL(file){
+        return new Promise((res,rej)=>{
+          const r = new FileReader();
+          r.onload = ()=>res(r.result);
+          r.onerror = rej;
+          r.readAsDataURL(file);
+        });
+      }
+      function loadImage(src){
+        return new Promise((res,rej)=>{
+          const i = new Image();
+          i.onload = ()=>res(i);
+          i.onerror = rej;
+          i.src = src;
+        });
+      }
+
+      // Compressor & ZIP
+      qVal.textContent = qualityRange.value;
+      qualityRange.addEventListener('input', ()=> qVal.textContent = qualityRange.value);
+
+      compressBtn.addEventListener('click', async ()=>{
+        if(images.length===0) return;
+        compressBtn.disabled = true;
+        status.textContent = 'Compressing images...';
+        try {
+          const zip = new JSZip();
+          const q = parseFloat(qualityRange.value);
+          const maxWidth = parseInt(maxW.value,10);
+          for(let i=0;i<images.length;i++){
+            const it = images[i];
+            const dataURL = await fileToDataURL(it.file);
+            const img = await loadImage(dataURL);
+            // resize preserving ratio
+            let w = img.width, h = img.height;
+            if(w > maxWidth){
+              const r = maxWidth / w;
+              w = Math.round(w*r); h = Math.round(h*r);
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = w; canvas.height = h;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img,0,0,w,h);
+            const out = canvas.toDataURL('image/jpeg', q);
+            // store compressed dataURL on the item for preview and optional use
+            it.compressedDataURL = out;
+            const bin = dataURLtoBlob(out);
+            zip.file(humanName(i), bin);
+            status.textContent = `Compressing ${i+1}/${images.length}...`;
+            await sleep(120); // small pause for UI
+          }
+          // create zip blob
+          const content = await zip.generateAsync({type:"blob"}, meta => {
+            status.textContent = `Zipping... ${Math.round(meta.percent)}%`;
+          });
+          saveAs(content, "pixify_compressed_images.zip");
+          status.textContent = 'Compressed images ready — ZIP downloaded.';
+        } catch(err){
+          console.error(err);
+          status.textContent = 'Compression error.';
+        } finally {
+          compressBtn.disabled = false;
+          setTimeout(()=>status.textContent='',2000);
+        }
+      });
+
+      previewCompressed.addEventListener('click', ()=>{
+        // open last compressed image in new tab if exists
+        const last = images.find(i=>i.compressedDataURL);
+        if(last){
+          const w = window.open();
+          w.document.body.style.background = '#001021';
+          const img = w.document.createElement('img');
+          img.src = last.compressedDataURL;
+          img.style.maxWidth='100%';
+          w.document.body.appendChild(img);
+        } else {
+          status.textContent = 'No compressed preview available yet. Run compress first.';
+          setTimeout(()=>status.textContent='',2000);
+        }
+      });
+
+      // helpers
+      function dataURLtoBlob(dataurl){
+        const parts = dataurl.split(',');
+        const mime = parts[0].match(/:(.*?);/)[1];
+        const bstr = atob(parts[1]);
+        let n = bstr.length; const u8 = new Uint8Array(n);
+        while(n--) u8[n] = bstr.charCodeAt(n);
+        return new Blob([u8], {type:mime});
+      }
+      function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
+
+      // small extras: about / theme toggle (light mode)
+      document.getElementById('aboutBtn').addEventListener('click', ()=>{
+        alert('PixifyPDF v1 — Client-side image to PDF and image compressor. No uploads to server. Made for speed & privacy.');
+      });
+
+      // light theme toggle (simple)
+      const toggleTheme = document.getElementById('toggleTheme');
+      toggleTheme.addEventListener('click', ()=>{
+        const body = document.body;
+        if(body.dataset.light==='1'){
+          body.dataset.light = '0';
+          toggleTheme.textContent='Light';
+          // revert to dark (default)
+          body.style.background = 'linear-gradient(180deg,#060712 0%, #061226 100%)';
+        } else {
+          body.dataset.light='1';
+          toggleTheme.textContent='Dark';
+          body.style.background = 'linear-gradient(180deg,#f7fbff 0%, #eef6ff 100%)';
+          // optional quick light-mode color tweak
+        }
+      });
+
+      // init
+      updateButtons();
+
+      // keyboard accessible: allow dropzone to open file selector with Enter
+      dropzone.addEventListener('keydown', (e)=>{ if(e.key==='Enter') fileInput.click(); });
+
+    })();
+  </script>
+</body>
+</html>
