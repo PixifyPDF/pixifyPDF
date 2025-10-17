@@ -1,0 +1,23 @@
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.log
+*.tmp
+
+# IDE / Editor settings
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Node / build system (only if you add them later)
+node_modules/
+dist/
+build/
+.env
+
+# Cache files
+.cache/
+*.bak
